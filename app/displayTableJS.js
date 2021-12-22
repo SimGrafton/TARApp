@@ -1,7 +1,24 @@
+function RefreshIndexData()
+{
+	$('.innerContent').html(''); 
+	$('.data').html('');
+	$('.data2').html("");
+	$('.data3').html("");
+}
+
 // Show data button
 $('.btnShow').click(function() {
-	// Write out stock in html
+
+	RefreshIndexData(); 
+	
+	$('.innerContent').html('Loading data into table...');
+	$('.data').html('<div class="spinner-border text-info" role="status"><span class="sr-only">Loading...</span></div>');
+
+
+ 	// Write out stock in html
 	console.log("Opening Json file");
+
+	$('.data').html('<div class="spinner-border text-info" role="status"><span class="sr-only">Loading...</span></div>');
 
 	fs.readFile('app/json.json', 'utf8', function (err, mainJsonFile) {
 		if (err) {
