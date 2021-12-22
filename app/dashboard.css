@@ -1,0 +1,29 @@
+/*
+ * Base structure
+ */
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+}
+
+/*
+ * Typography
+ */
+
+/* h1 {
+  margin-bottom: 20px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #eee;
+} */
+
+/*  Allows for drag screen from the titlebar when the windows frame and menu is disabled */
+.titlebar{
+ -webkit-user-select: none; 
+  -webkit-app-region: drag;
+}
+
+.innerContent{
+  padding-left: 400px;
+}
+
