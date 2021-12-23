@@ -75,16 +75,12 @@ $(".btnUpdate").click(async function () {
 			text +='<option value="' + response[i] + '">' + response[i] + '</option>'; 
 		}
 
-		// Fix until added extra add security feature
-		text +='<option value="Gold">Gold</option>';
-
-
 		text += '</select>';
 
 		$('.data').html(text);
 
 		// Load box to input key to use for ajax yahoo finance Request
-		$('.data2').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
+		$('.data2').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'><input id='securityRegion' type='text' placeholder='Enter Security Region..'></input>");
 
 		// Load Submit Button
 		$('.data3').html("<button id='btnUpdateStockSubmit' class='btn btn-primary mt-2 '>Update</button>");
@@ -103,8 +99,9 @@ async function SendAPIHttpRequest(){
 	
 	let symbol = document.getElementById("stockSelector").value;
 	let key = document.getElementById("yahooKey").value;
+	let region = document.getElementById("securityRegion").value; 
 
-	let settings = SetYahooFinanceAPIRequestSettings(symbol, key);
+	let settings = SetYahooFinanceAPIRequestSettings(symbol, key, region);
 
 	if (settings != 1)
 	{
@@ -121,7 +118,7 @@ async function SendAPIHttpRequest(){
 }
 
 // Validates symbol and key and returns settings object
-function SetYahooFinanceAPIRequestSettings(symbol, key)
+function SetYahooFinanceAPIRequestSettings(symbol, key, regionCode)
 {
 	// Check key is valid
 	if(key.length<30)
@@ -131,19 +128,14 @@ function SetYahooFinanceAPIRequestSettings(symbol, key)
 		return 1;
 	}
 
-	// Check symbol is valid
-	if(symbol != "RR.L"&& symbol != "Gold")
-	{
-		alert("Security selection is invalid");
-		console.log("Security selection is invalid");
-		return 1; 
-	}
-
 	console.log("Updating " + symbol + " Data"); 
 
 	// Set the region code of the stocks sought
-	let regionCode = "GB";
-
+	if(regionCode.length < 1)
+	{
+		regionCode = "GB";
+	}
+	
 	// Set the settings for API request to Yahoo Finance API
 	const settings = {
 			"async": true,
@@ -311,5 +303,28 @@ function DeleteData()
 	}); 
 }
 
+// Event Listener for add securities data button
+$( ".btnAdd" ).click(LoadAddHTML);
 
+// Load html for add 
+
+function LoadAddHTML()
+{
+	RefreshIndexData();
+
+	// Load Title
+	$('.innerContent').html('<div class="p-1 text-center"><h5 class="mb-1">Add Security Data</h5></div>'); 
+
+	// Load Search Box
+	$('.data').html('<input id="stockSelector" type="text" placeholder="Enter Security Identifier.."></input><input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>'); 
+
+	// Load box to input key to use for ajax yahoo finance Request
+	$('.data2').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
+
+	// Load Submit Button
+	$('.data3').html("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
+
+	// Sumbit Button Event Listener
+	$("#btnAddStockSubmit").click(SendAPIHttpRequest);
+}
 
