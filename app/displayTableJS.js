@@ -6,19 +6,49 @@ function RefreshIndexData()
 	$('.data3').html("");
 }
 
+$('.btnShow').click(async function() {
+
+	RefreshIndexData();
+	
+	$('.innerContent').html('<div class="p-1 text-center">' +
+								'<h5 class="mb-1">Select Data to Display in Table</h5>' + 
+							'</div>'); 
+
+	await GetSecuritiesFromJSON().then(function(response) {
+		
+		// Load select box with securites found within json file for user to to select security symbol
+
+		let text = '<select name="stockSymbolSelect" id="stockSelector" ><option value="" disabled selected>Select Security</option>'; 
+
+		for (let i in response)
+		{
+			text +='<option value="' + response[i] + '">' + response[i] + '</option>'; 
+		}
+
+		text += '</select>';
+
+		$('.data').html(text);
+
+		// Load Submit Button
+		$('.data3').html("<button id='btnLoadTableSubmit' class='btn btn-primary mt-2 '>Update</button>");
+
+		// Sumbit Button Event Listener
+		$("#btnLoadTableSubmit").click(LoadTable);
+	})
+
+});
+
 // Show data button
-$('.btnShow').click(function() {
+function LoadTable() {
+
+	let stock = document.getElementById("stockSelector").value;
 
 	RefreshIndexData(); 
 	
 	$('.innerContent').html('Loading data into table...');
-	$('.data').html('<div class="spinner-border text-info" role="status"><span class="sr-only">Loading...</span></div>');
+	$('.data').html('<div class="spinner-border text-info" role="status"><span class="sr-only">Loading...</span></div>'); // Loading spinner
 
-
- 	// Write out stock in html
 	console.log("Opening Json file");
-
-	$('.data').html('<div class="spinner-border text-info" role="status"><span class="sr-only">Loading...</span></div>');
 
 	fs.readFile('app/json.json', 'utf8', function (err, mainJsonFile) {
 		if (err) {
@@ -28,11 +58,12 @@ $('.btnShow').click(function() {
 		else {
 			console.log("Json file opened");
 			if(parsedMainJsonFile = JSON.parse(mainJsonFile)){
-				console.log("Json parsed, writing to html");
-				$('.innerContent').html(Object.keys(parsedMainJsonFile.stocks)[0]);
+				console.log("Json parsed, loading into table");
+				$('.innerContent').html(stock);
 				DrawTable(); 
-				AddDataToTable(parsedMainJsonFile);
-
+				//alert(JSON.stringify(parsedMainJsonFile.stocks[stock])); 
+				AddDataToTable(parsedMainJsonFile.stocks[stock], stock);
+				
 			}
 			else{         
 				console.log("Unable to parse json file to display data");
@@ -41,7 +72,7 @@ $('.btnShow').click(function() {
 		}
 
 	})
-});
+}; 
 
 function DrawTable(){
 	// Set headers for table
@@ -62,25 +93,25 @@ function DrawTable(){
 
 }; 
 
-function AddDataToTable(parsedMainJsonFile){
+function AddDataToTable(parsedMainJsonFile, stock){
 	let $table = $('#table'); 
 
 	// Get length of data array
-	let pricesNum = Object.keys(parsedMainJsonFile.stocks["RR.L"].prices).length; 
+	let pricesNum = Object.keys(parsedMainJsonFile.prices).length; 
 
 	for(i = 0; i < pricesNum; i++){
 		// Add rows
 		$table.bootstrapTable('insertRow', {
 			index: 1,
 			row: {
-			unixDate: parsedMainJsonFile.stocks["RR.L"].prices[i].date, 
-			date: DateConverter(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].date)),
-			time: TimeConverter(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].date)), 
-			open: Round(Number(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].open))),
-			high: Round(Number(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].high))),
-			low: Round(Number(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].low))),
-			close: Round(Number(JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].close))),
-			volume: JSON.stringify(parsedMainJsonFile.stocks["RR.L"].prices[i].volume)
+			unixDate: parsedMainJsonFile.prices[i].date, 
+			date: DateConverter(JSON.stringify(parsedMainJsonFile.prices[i].date)),
+			time: TimeConverter(JSON.stringify(parsedMainJsonFile.prices[i].date)), 
+			open: Round(Number(JSON.stringify(parsedMainJsonFile.prices[i].open))),
+			high: Round(Number(JSON.stringify(parsedMainJsonFile.prices[i].high))),
+			low: Round(Number(JSON.stringify(parsedMainJsonFile.prices[i].low))),
+			close: Round(Number(JSON.stringify(parsedMainJsonFile.prices[i].close))),
+			volume: JSON.stringify(parsedMainJsonFile.prices[i].volume)
 			}
 		})
 	}
@@ -113,4 +144,4 @@ function TimeConverter(UNIX_timestamp){
 
 function Round(num){
 	return Math.round((num + Number.EPSILON) * 100) / 100; 
-}
+};
