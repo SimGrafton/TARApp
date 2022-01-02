@@ -1,4 +1,5 @@
-// Stocks Supports
+// import syntax (recommended)
+const yahooFinance = require('yahoo-finance2');
 
 function RefreshIndexData()
 {
@@ -7,25 +8,6 @@ function RefreshIndexData()
 	$('.data2').html("");
 	$('.data3').html("");
 }
-
-let stockSymbol = [
-	'RR.L'
-]
-
-	//  'BARC.L',
-//     'BKG.L',
-//     'BA.L',
-//     'BP.L',
-//     'DGE.L',
-//     'GLEN.L',
-//     'HL.L',
-//     'HSBA.L',
-//     'IAG.L',
-//     'LGEN.L',
-//     'LLOY.L',
-//     'MRW.L',
-//     'RDSA.L',
-//     'SSE.L'];
 
 // Get Stocks from JSON file
 async function GetSecuritiesFromJSON()
@@ -318,13 +300,29 @@ function LoadAddHTML()
 	// Load Search Box
 	$('.data').html('<input id="stockSelector" type="text" placeholder="Enter Security Identifier.."></input><input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>'); 
 
+	// Load Timeliness Selection box with options
+	$('.data2').html('<select name="timelinessSelect" id="timeSelector" ><option value="" disabled selected>Select Timeliness</option>'
+						+ '<option value="day">Day</option>'
+						+ '<option value="hour">Hour</option>'
+						+ '<option value="minute">Minute</option>'
+					+ '</select>');
+
 	// Load box to input key to use for ajax yahoo finance Request
-	$('.data2').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
+	$('.data3').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
 
 	// Load Submit Button
-	$('.data3').html("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
+	$('.data4').html("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
 
-	// Sumbit Button Event Listener
-	$("#btnAddStockSubmit").click(SendAPIHttpRequest);
+	// Submit Button Event Listener
+	//$("#btnAddStockSubmit").click(SendAPIHttpRequest);
+
+	// Tester Submit button
+	$("#btnAddStockSubmit").click(FakeSendRequest);
+}
+
+async function FakeSendRequest()
+{
+	alert(await yahooFinance.search('AAPL'));
+
 }
 

@@ -24,7 +24,8 @@
     "php": "^1.0.2",
     "popper.js": "^1.16.1",
     "require.js": "^1.0.0",
-    "tether": "^1.4.7"
+    "tether": "^1.4.7",
+    "yahoo-finance2": "^2.1.0"
   },
   "standard": {
     "globals": [
