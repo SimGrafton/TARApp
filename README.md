@@ -19,9 +19,19 @@ ctrl + r from within app or view -> reload
 
 -- To do --
 
-- Ref 6. Improvement - Update so that you can select what data to show in table
-- Ref 4. Improvement - Update so that you can seek the timeliness of data, perhaps expanding the json file so that data is split by timelinesses
-- Ref 5. Feature - Implement graphs button
+4-Improvement-timeliness. Update so that you can seek the timeliness of data, perhaps expanding the 
+json file so that data is split by timelinesses. Need to change update data to allow selection of timelinesses and to
+store correctly. Then need to update show data so that you can select by timeliness (or so you click expand then it gets
+the intraday data?
+
+This is a bigger issue than I thought, in order to reliably get historical data on a minute timestamp, I therefore have
+2 options:
+1. Start a new record collection for each stock. This would be a script that would run each minute during the trading day
+and would record the price into a json file.
+2. Write code to get this data from charts online
+
+
+5-Feature-graphs. Implement graphs button
 
 -- End of To do --
 
