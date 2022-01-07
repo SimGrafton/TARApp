@@ -2,7 +2,7 @@
 <html lang="en" style="height:100%;">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval'">
     <css>
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="dashboard.css">
@@ -99,6 +99,8 @@
 </body>
 
 <scripts>
+    
+
     <!-- normal script imports etc  -->
     <script src="otherjs.js"></script>
     <script src="../node_modules/commonjs/lib/system.js"></script>
@@ -112,5 +114,7 @@
 
     <!-- For bootstrap table -->
     <script src="../node_modules/bootstrap-table/dist/bootstrap-table.min.js"></script>
+
+    
 </scripts>
 </html>

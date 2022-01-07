@@ -1,4 +1,8 @@
-// Stocks Supports
+// For Running Python Script
+'use strict';
+const { spawn } = require( 'child_process' );
+
+
 
 function RefreshIndexData()
 {
@@ -296,28 +300,127 @@ function LoadAddHTML()
 	// Load Title
 	$('.innerContent').html('<div class="p-1 text-center"><h5 class="mb-1">Add Security Data</h5></div>'); 
 
-	// Load Search Box
-	$('.data').html('<input id="stockSelector" type="text" placeholder="Enter Security Identifier.."></input><input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>'); 
+	// Load Security Search Box
+	// Load Region box (no longer requred) <input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>
+	$('.data').html('<input id="stockSelector" type="text" placeholder="Enter Security Identifier.."></input>'); 
 
 	// Load Timeliness Selection box with options
-	$('.data2').html('<select name="timelinessSelect" id="timeSelector" ><option value="" disabled selected>Select Timeliness</option>'
-						+ '<option value="day">Day</option>'
-						+ '<option value="hour">Hour</option>'
-						+ '<option value="minute">Minute</option>'
+	$('.data2').html('<select name="timelinessSelect" id="intervalSelector" ><option value="" disabled selected>Select Timeliness</option>'
+						+ '<option value="1m">1 Minute</option>'
+						+ '<option value="2m">2 Minutes</option>'
+						+ '<option value="5m">5 Minutes</option>'
+						+ '<option value="15m">15 Minutes</option>'
+						+ '<option value="30m">30 Minutes</option>'
+						+ '<option value="1h">1 Hour</option>'
+						+ '<option value="1d">1 Day</option>'
+						+ '<option value="5d">5 Days</option>'
+						+ '<option value="1wk">1 Week</option>'
+						+ '<option value="1mo">1 Month</option>'
+						+ '<option value="3mo">3 Months</option>'
 					+ '</select>');
 
-	// Load box to input key to use for ajax yahoo finance Request
-	$('.data3').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
+	// Create Date Picker with start and end dates
+	$('.data3').html('<input type="date" id="startDate" name="trip-start"value="2022-01-01"><input type="date" id="endDate" name="trip-start"value="2022-01-01">');
+	
+	// Load box to input key to use for ajax yahoo finance Request (No longer required)
+	//$('.data3').html("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key'>");
 
 	// Load Submit Button
 	$('.data4').html("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
 
-	// Tester Submit button
-	$("#btnAddStockSubmit").click(FakeSendRequest);
+	// Submit button
+	$("#btnAddStockSubmit").click(RunYfinanceScript);
 }
 
-async function FakeSendRequest()
+
+async function RunYfinanceScript()
 {
-	//alert(await yahooFinance.search('AAPL'));
+	// TO DO Check whether data has been entered else don't submit "break myFunction;"
+
+	// Get Security Selected
+	let securitySelected = document.getElementById("stockSelector").value;
+
+	// Get Interval Selected
+	let interval = document.getElementById("intervalSelector").value;
+
+	// Get Start Date
+	let startDate = document.getElementById("startDate").value;
+	let startYear = startDate.slice(0, 4);
+	let startMonth = Has0(startDate.slice(5,7));
+	let startDay = Has0(startDate.slice(8,10)); 
+ 
+	// Get End Date
+	let endDate = document.getElementById("endDate").value;
+	let endYear = endDate.slice(0, 4);
+	let endMonth = Has0(endDate.slice(5,7));
+	let endDay = Has0(endDate.slice(8,10)); 
+
+	// Make execute cmd instructions
+	const dir = spawn( 'cmd', [ '/c', 'cd python & py startpy.py '+ securitySelected +' ' + startYear + ' ' + startMonth + ' ' + startDay + ' ' + endYear + ' ' + endMonth + ' ' + endDay + ' ' + interval ] );
+
+	// Output cmd responses
+	dir.stdout.on( 'data', ( data ) => function(){
+		//console.log( `stdout: ${ data }` ) 
+		console.log("Completed")
+	});
+	dir.stderr.on( 'data', ( data ) => console.log( `stderr: ${ data }` ) );
+	//dir.on( 'close', ( code ) => console.log( `child process exited with code ${code}` ) );
+
+	dir.stdout.on( 'data', ( data ) => CleanseReturnedData(securitySelected, interval) );
+
+
+	// Once the script has been run and the data file has been created within the python file. 
+	// This data needs to be sorted so that each data entry is formatted properly, with a timestamp
+	// The data can be clensed, as in, we only need one entry, we don't need a minute open and a minute close
+	
+	// JSON format will be as follows
+	// {"stocks":
+	// 	{"Gold":
+	//		{"1m":
+	//			{"date": 1640183400},
+	//			{"prices":
+	// 				[
+	// 					{"time":1640183400,"price":18.440000534057617,"volume":15105900},
+	// 					{"time":1640097000,"price":18.420000076293945,"volume":13909600},
+	// 				]	
+	// 			}
+	// 		},
+	//		{"1mo":
+	//			{"start date": 1640183400},
+	//			{"end date": 1640183400},
+	//			{"prices":
+	// 				[
+	// 					{"time":1640183400,"Open":111.25,"High":113.4000015259,"Low":91.1200027466,"Close":91.6999969482,"Adj Close":91.6999969482,"Volume":982374195},
+	// 					{"time":1640097000,"Open":111.25,"High":113.4000015259,"Low":91.1200027466,"Close":91.6999969482,"Adj Close":91.6999969482,"Volume":982374195},
+	// 				]	
+	// 			}
+	// 		},
+	// 		
+	// 	}
+	// }
 
 }
+
+// Checks whether the first element is 0 and if so it removes it. Required as the cmd arguments and yfinance python script fails if 01 represents jan rather than just 1, whereas the html date selector outputs as 01
+function Has0(num)
+{
+	if(num[0] == 0)
+	{
+		return num.slice(1);
+	}
+	else
+	{
+		return num;  
+	}
+	
+}
+
+async function CleanseReturnedData(securitySelected, interval )
+{
+
+	// Open the new file using the securitySelected which will be the file name + .txt and use the interval to get the right data, and the timeframe to get the right period
+
+	// Lastly need to update the JSON document with the new data. I think considering the amount of data now, that each stock needs its own file. This will help to organise
+	// all the data anyway. Plus I can store the old data elsewhere for later.
+}
+
