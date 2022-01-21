@@ -25,7 +25,8 @@ df = yf.download(tickers=str(sys.argv[1]), start=sd, end=ed, interval=str(sys.ar
 
 ## Write to file
 ##print(df)
-out = df.to_json(orient='records')[1:-1].replace('},{', '} {')
+out = df.to_json(orient='records')[1:-1]
+##.replace('},{', '} {')
 with open(str(sys.argv[1])+ ".txt", 'w') as f:
     f.write(out)
 

@@ -1,0 +1,1 @@
+AddDataHTML(`<div class="data1 p-1 mt-3 d-flex justify-content-center">Welcome to TARApp</div>`); 

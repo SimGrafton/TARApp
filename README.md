@@ -19,19 +19,22 @@ ctrl + r from within app or view -> reload
 
 -- To do --
 
-4-Improvement-timeliness. Update so that you can seek the timeliness of data, perhaps expanding the 
-json file so that data is split by timelinesses. Need to change update data to allow selection of timelinesses and to
-store correctly. Then need to update show data so that you can select by timeliness (or so you click expand then it gets
-the intraday data?
+4-Improvement-timeliness
+Changed system so that you now only seek 1m data. This data can then be used to fill 3 min, 1 hour, 1 day etc... data
 
-This is a bigger issue than I thought, in order to reliably get historical data on a minute timestamp, I therefore have
-2 options:
-1. Start a new record collection for each stock. This would be a script that would run each minute during the trading day
-and would record the price into a json file.
-2. Write code to get this data from charts online
+Update rest of code within update code
+Change so that when you seek data you only have to fill in one date search box. 
+Update so that 1m and all timeliness data will display in charts. 
+Update so that data needed is cached, for example recording the data held should not have to run through all data everytime, but cache what is there.
+Might be a good time to work out how to cache data in appdata - I need to specify what will be cached, need a list that is held in a json file with option
+to reload cache. Maybe just a master reload caches button? Or reload caches on data download only?
+Cached items:
+- Dates that are non trading days for each region
+- Dates for which data is held (as when the files get larger I don't want it to read the entire file each time you want to add new data)
 
-
-5-Feature-graphs. Implement graphs button
+5-Feature. Graphs. Implement graphs button
+6-Feature. Add ability to see the days of data held. Add the ability to add a weeks worth of data. So that you only have to redo the script once per week.
+7-Feature. Create Home Page which shows the bots and other, last updated, data held etc...
 
 -- End of To do --
 

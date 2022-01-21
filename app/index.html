@@ -10,6 +10,9 @@
 
         <!-- For bootstrap table -->
         <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
+
+        <!-- For bootstrap datepicker -->
+        <link href="../node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css" />
     </css>  
     <title>TARApp</title>
 </head>
@@ -56,7 +59,7 @@
                                 Data
                             </a>
                             <div class=" nav-item collapse" id="collapseUpdate">
-                                <a href="#" class="btnAdd ml-3 text-dark small" style="text-decoration: none !important; display: block;">- Add Data</a>
+                                <!-- <a href="#" class="btnAdd ml-3 text-dark small" style="text-decoration: none !important; display: block;">- Add Data</a> -->
                                 <a href="#" class="btnUpdate ml-3 text-dark small" style="text-decoration: none !important; display: block;">- Update Data</a>
                                 <a href="#" class="btnDelete ml-3 text-dark small" style="text-decoration: none !important; display: block;">- Delete Data</a>
                             </div>
@@ -78,22 +81,7 @@
             </div>
             <!-- Sidebar End -->
             <!-- Main Page Content -->
-            <div class="mainContent p-2 d-flex flex-column border " style="height: 100%; min-width: 85%;">
-                
-                <div class="innerContent p-1 mt-3 d-flex justify-content-center">
-                    Hello
-                </div>
-                <div class="data p-1 d-flex justify-content-center" >
-                    Click "Show Data" to display held data here
-                </div>
-                <div class="data2 d-flex justify-content-center p-1">
-                    Update Readme and Work from Branch
-                </div>
-                <div class="data3 d-flex justify-content-center p-1">
-                </div>
-                <div class="data4 d-flex justify-content-center p-1">
-                </div>
-            </div>
+            <div class="mainContent p-2 d-flex flex-column border " style="height: 100%; min-width: 85%;"></div>
             <!-- Main Page Content End -->
         </div>
 </body>
@@ -108,12 +96,20 @@
     <script src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="../renderer.js"></script>
     <script src="mainJS.js"></script>
-    <script src="updateDataJS.js"></script>
+    <script src="dashboardJS.js"></script>
+    <script src="dataJS.js"></script>
+    <script src="updateDataYahooJS.js"></script>
+    <script src="updateDataPythonJS.js"></script>
+    <script src="deleteDataYahooJS.js"></script>
+    <script src="deleteDataPythonJS.js"></script>
     <script src="displayTableJS.js"></script>
     <script src="displayGraphJS.js"></script>
 
     <!-- For bootstrap table -->
     <script src="../node_modules/bootstrap-table/dist/bootstrap-table.min.js"></script>
+
+    <!-- For bootstrap datepicker -->
+    <script src="../node_modules/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
 
     
 </scripts>
