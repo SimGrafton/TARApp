@@ -31,3 +31,8 @@ function RefreshIndexData()
 	$(".mainContent").html(""); 
 
 }
+
+function OutputError(text)
+{
+    AddDataHTML(`User Selection invalid error: ${text}`); 
+}

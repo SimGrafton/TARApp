@@ -65,7 +65,7 @@ function YahooUpdateAfterSelectedPage()
 		RefreshIndexData();
 
 		// Set calendar with highlighted dates for which daily data is held
-		AddDataHTML(`<h5>View held data and update or add daily data from Yahoo Finance${symbol}</h5>`);
+		AddDataHTML(`<h5>View held data and update or add daily data from Yahoo Finance</h5>`);
 		AddDataHTML(`<h5 id="security">${symbol}</h5>`);
 
 		// Show held data
@@ -86,6 +86,14 @@ function YahooUpdateAfterSelectedPage()
 
 		// Load Submit Button and back button
 		AddDataHTML("<button id='btnUpdateStockSubmit' class='btn btn-primary mt-2 '>Update</button><button id='btnBackYahooUpdatePage' class='btn mt-2 '>Back</button>");
+
+		// Load fake send request tickbox
+		AddDataHTML(`<div class="form-check">
+		<input class="form-check-input" type="checkbox" id="fakeTickbox" value="checked">
+		<label class="form-check-label" for="fakeTickbox">
+		  Fake Request?
+		</label>
+	  </div>`)
 
 		// Sumbit Button Event Listener
 		$("#btnUpdateStockSubmit").click(SendAPIHttpRequest);
@@ -140,45 +148,93 @@ async function SendAPIHttpRequest(){
 	let key = document.getElementById("yahooKey").value;
 	let region = document.getElementById("securityRegion").value;
 
-	console.log(`Updating ${symbol} data`); 
-	AddDataHTML(`Updating ${symbol} data`);
+	console.log(`Yahoo Process - Updating ${symbol} data`); 
 
 	let settings = SetYahooFinanceAPIRequestSettings(symbol, key, region);
 
-	if (settings != 1)
+	// Fake Test or send real ajax request if both key is entered and fake test isnt clicked
+	if (settings == 1)
 	{
-		// Fake send
-		let response = [{
-			"Gold": [{
-				"prices": [{
-					"date": 1642602600,
-					"open": 18.809999465942383,
-					"high": 20.239999771118164,
-					"low": 18.760000228881836,
-					"close": 20.170000076293945,
-					"volume": 36128300,
-					"adjclose": 20.170000076293945
-				}, {
-					"date": 1642516200,
-					"open": 18.559999465942383,
-					"high": 18.850000381469727,
-					"low": 18.469999313354492,
-					"close": 18.559999465942383,
-					"volume": 13184400,
-					"adjclose": 18.559999465942383
-				}]
-			}]
-		}]
-		OpenYahooFileAndWrite(response, symbol);
+		if($("#fakeTickbox").is(":checked"))
+		{
+			console.log("Yahoo Test Process - Running program with fake data");
 
-		// // Actual send
-		// await MakeAjaxRequest(settings).then(async function (response) {
-		// 	console.log("Ajax request made, calling open file and write"); 
+			// Set fake data
+			let fakeData = {
+					"prices": [{
+						"date": 1642602600,
+						"open": 18.809999465942383,
+						"high": 20.239999771118164,
+						"low": 18.760000228881836,
+						"close": 20.170000076293945,
+						"volume": 36128300,
+						"adjclose": 20.170000076293945
+					}, {
+						"date": 1642516200,
+						"open": 18.559999465942383,
+						"high": 18.850000381469727,
+						"low": 18.469999313354492,
+						"close": 18.559999465942383,
+						"volume": 13184400,
+						"adjclose": 18.559999465942383
+					}, {
+						"date": 1642170600,
+						"open": 18.860000610351562,
+						"high": 18.90999984741211,
+						"low": 18.520000457763672,
+						"close": 18.68000030517578,
+						"volume": 12802000,
+						"adjclose": 18.68000030517578
+					}],
+					"isPending": false,
+					"firstTradeDate": 477153000,
+					"id": "",
+					"timeZone": {
+						"gmtOffset": -18000
+					},
+					"eventsData": [{
+						"amount": 0.23,
+						"date": 1638196200,
+						"type": "DIVIDEND",
+						"data": 0.23
+					}, {
+						"amount": 0.23,
+						"date": 1630330200,
+						"type": "DIVIDEND",
+						"data": 0.23
+					}, {
+						"amount": 0.23,
+						"date": 1622122200,
+						"type": "DIVIDEND",
+						"data": 0.23
+					}, {
+						"amount": 0.09,
+						"date": 1614349800,
+						"type": "DIVIDEND",
+						"data": 0.09
+					}]
+				
+			}; 
 
-		// 	// Append or update it to json file (works up to 100mb file), if it's there then update, else append
-		// 	OpenYahooFileAndWrite(response, symbol);
+			console.log("Yahoo Test Process - Test run using existing data")
+
+			OpenYahooFileAndWrite(fakeData, symbol);
+		}
+		else
+		{
+			return; 
+		}
+	}
+	else
+	{
+		// Actual send
+		await MakeAjaxRequest(settings).then(async function (response) {
+			console.log("Yahoo Finance - Ajax request made, calling open file and write"); 
+
+			// Append or update it to json file (works up to 100mb file), if it's there then update, else append
+			OpenYahooFileAndWrite(response, symbol);
 	
-		// })
+		})
 	}
 	
 }
@@ -187,13 +243,12 @@ async function SendAPIHttpRequest(){
 function SetYahooFinanceAPIRequestSettings(symbol, key, regionCode)
 {
 
-	console.log("- Defining settings for Yahoo Request"); 
-	AddDataHTML("- Defining settings for Yahoo Request");
+	console.log("Yahoo Process - Defining settings for Yahoo Request"); 
 
 	// Check key is valid
 	if(key.length<30)
 	{
-		alert("Key is incorrect");
+		OutputError("Key is incorrect. Please input a correct User Key for Yahoo Finance")
 		console.log("Key is incorrect");
 		return 1;
 	}
@@ -228,8 +283,7 @@ function SetYahooFinanceAPIRequestSettings(symbol, key, regionCode)
 // Makes the ajax request taking settings variable
 async function MakeAjaxRequest(settings) {
 
-	console.log("- Making Ajax request to Yahoo Finance API"); 
-	AddDataHTML("- Making Ajax request to Yahoo Finance API");
+	console.log("Yahoo Process - Making Ajax request to Yahoo Finance API"); 
 	
 	return $.ajax(settings); 
 	
@@ -238,83 +292,173 @@ async function MakeAjaxRequest(settings) {
 // Opens file, gets stats of file and check file has size, if so, if file has the stock, updates the values, otherwise it appends.
 async function OpenYahooFileAndWrite(data, symbol) {
 
-	// ALSO NEEDS TO CHECK WHAT DATA IS HELD
+	console.log("Yahoo Process - Writing new data to json files"); 
 
-	console.log("- Writing new data to json files"); 
-	AddDataHTML("- Writing new data to json files");
+	// Get cached Data// Add new data
+	await GetCachedData(symbol).then(function(response){
 
-	fs.readFile(`data/yahooData/${symbol}.json`, 'utf8', function (error, mainJsonFile) {
-		if (error) { 
-			if(error = `Error:  ENOENT: no such file or directory, open 'D:\\projects\\TARWeb\\data\\yahooData\\${symbol}.json'`)
-			{
-				AddDataHTML('Existing File not found. Creating new file...' );  
+		fs.readFile(`data/yahooData/${symbol}.json`, 'utf8', function (error, mainJsonFile) {
+			if (error) { 
+				if(error = `Error:  ENOENT: no such file or directory, open 'D:\\projects\\TARWeb\\data\\yahooData\\${symbol}.json'`)
+				{
+					console.log('Yahoo Process - Existing File not found. Creating new file...' );  
+	
+					// Set new object and write
+					let jsonToAdd = {[`${symbol}`]: {}}; 
+					jsonToAdd[`${symbol}`] = data; 
+	
+					fs.writeFile(`data/yahooData/${symbol}.json`, JSON.stringify(jsonToAdd), function writeJSON(err) {
+						if (err) 
+						{
+							return console.log(err);
+						}
+						else{ 
+							console.log('Yahoo Process - New file created and data added'); 
+							ReCache(symbol); 
+							return; 
+						}
+					})
+	
+				}
+				else{
+					console.log(`Error Opening file:  ${error}`);
+				}
+			}
+			else {
+	
+				// Data is there and file is opened as mainJsonFile
+	
+				// Parse the json returned
+				let parsedMainJsonFile = JSON.parse(mainJsonFile); 
+				if(!parsedMainJsonFile)
+				{
+					console.log("Failed to Parse Json");
+					return;
+				} 
 
-				// Set new object and write
-				let jsonToAdd = {[`${symbol}`]: {}}; 
-				jsonToAdd[`${symbol}`] = [data]; 
+				// Create an array of dates that will not be entered
+				let datesNotAdded = []; 
+				let datesAdded = []; 
 
-				fs.writeFile(`data/yahooData/${symbol}.json`, JSON.stringify(jsonToAdd), function writeJSON(err) {
+				for(let q of data['prices'])
+				{
+					// For each new entry, check if in array of cache, if not then add it, if so then put in an array and output not added data
+					// if q in response then do not add 
+					if (response.includes(q[`date`]))
+					{
+						datesNotAdded.push(q[`date`]); 
+					}
+					else{
+						// Put data into into array
+						parsedMainJsonFile[`${symbol}`]['prices'].push(q); 
+						datesAdded.push(q[`date`]);
+
+					}
+
+				}
+
+				// Output dates not added
+				alert(`Some data for dates sought is held and has not been added. The following dates have been added: ${datesAdded}`);
+				console.log(`Data for the following dates is held and has not been added: ${datesNotAdded}`);
+				console.log(`Data for the following dates has been added ${datesAdded}`)
+					
+	
+				fs.writeFile(`data/yahooData/${symbol}.json`, JSON.stringify(parsedMainJsonFile), function writeJSON(err) {
 					if (err) 
 					{
-						AddDataHTML(err);
-						return console.log(err);
-					}
-					else{ 
-						AddDataHTML('New file created and data added' );
-						console.log('New file created and data added'); 
-						ReCache(symbol); 
-						return; 
-					}
-				})
-
-			}
-			else{
-				console.log(`Error Opening file:  ${error}`);
-				AddDataHTML('Error Opening file' );
-			}
-		}
-		else {
-
-			// Data is there and file is opened as mainJsonFile, need to parse the json into a js object, and check each entry against the first and last dates of the new data obtained. 
-
-			// Parse the json returned
-			let parsedMainJsonFile = JSON.parse(mainJsonFile); 
-			if(!parsedMainJsonFile)
-			{
-				console.log("Failed to Parse Json");
-				AddDataHTML( "Failed to Parse Json"); 
-				return;
-			} 
-
-			console.log(parsedMainJsonFile[symbol][0]); 
-		
-				// Add json
-				parsedMainJsonFile[`${symbol}`].push(data);
-
-				fs.writeFile(`app/json.json`, JSON.stringify(parsedMainJsonFile), function writeJSON(err) {
-					if (err) 
-					{
-						console.log(err);
-						AddDataHTML( `Error writing data to file: ${err}`); 
+						console.log(`Error writing data to file: ${err}`);
 						return ; 
 					}
 					else{
-						AddDataHTML( `Data updated`);
-						console.log("Data updated")
+						console.log( `Yahoo Process - Data updated`);
 						ReCache(symbol); 
 					}
 				})
 			}
 		}
-		)
+	)
+	}); 
 };
+
+async function GetCachedData(symbol)
+{
+	return new Promise(resolve => {
+
+		// Open cache
+		fs.readFile(`data/cache.json`, 'utf8', function (error, cachedData) {
+			if (error) { 
+				
+				console.log(`Error Opening file:  ${error}`);
+				
+			}
+			else {
+				// Parse data
+				let parsedCache = JSON.parse(cachedData); 
+				resolve(parsedCache[symbol]); 
+			}
+		})
+	})
+	
+}
 
 // After the new data has been entered into the database, the cache files are recached
 function ReCache(symbol)
 {
 	// Need to first make the caches then make showdata highlight the stored dates on the calendar
 
-	console.log('Caching')
 	// Run through the JSON file and get the days held under the symbol and put into a long json string under each year
+	console.log(`Yahoo Process - Opening JSON data file for ${symbol} to prepare cache`); 
+
+	// Open file
+	fs.readFile(`data/yahooData/${symbol}.json`, 'utf8', function (error, mainJsonFile) {
+		if (error) { 
+			
+			console.log(`Error Opening file:  ${error}`);
+			
+		}
+		else {
+
+			// Parse the json returned
+			let parsedMainJsonFile = JSON.parse(mainJsonFile); 
+
+			let datesHeld = []; 
+
+			for(let i of parsedMainJsonFile[symbol]['prices'])
+			{
+				datesHeld.push(i.date); 
+			}
+
+			// Open cache, find the array for the symbol and store
+			fs.readFile(`data/cache.json`, 'utf8', function (error2, cache) {
+				if (error) { 
+					console.log(`Error Opening Cache:  ${error2}`);			
+				}
+				else{
+
+					// Parse the json returned
+					let parsedCache = JSON.parse(cache);
+					parsedCache[symbol] = datesHeld; 
+
+					// Save to file
+					fs.writeFile(`data/cache.json`, JSON.stringify(parsedCache), function writeJSON(err) {
+						if (err) 
+						{
+							console.log( `Error updating Cache: ${err}`);
+							return ; 
+						}
+						else{
+							console.log("Yahoo Process - Cache updated")
+						}
+					})
+
+				}
+
+			}
+
+			)
+
+
+		}
+	})
 
 } 
