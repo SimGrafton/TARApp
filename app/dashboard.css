@@ -27,3 +27,12 @@ body {
   padding-left: 400px;
 }
 
+/*  For datepicker */
+
+.event a {
+  background-color: #42B373 !important;
+  background-image :none !important;
+  color: #ffffff !important;
+}
+
+/*  End of For datepicker */

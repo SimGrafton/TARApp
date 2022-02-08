@@ -21,6 +21,8 @@
     "electron-reload": "^2.0.0-alpha.1",
     "file-system": "^2.2.2",
     "jquery": "^3.6.0",
+    "jquery-ui": "^1.13.1",
+    "jquery-ui-dist": "^1.13.0",
     "mdb-ui-kit": "^3.10.1",
     "php": "^1.0.2",
     "popper.js": "^1.16.1",

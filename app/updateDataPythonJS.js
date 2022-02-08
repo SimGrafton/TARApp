@@ -24,24 +24,12 @@ function PythonUpdatePage() {
 						<option value="1m" selected="selected">1 Minute</option>
 					</select>`);
 
-					// <option value="2m">2 Minutes</option>
-					// 	<option value="5m">5 Minutes</option>
-					// 	<option value="15m">15 Minutes</option>
-					// 	<option value="30m">30 Minutes</option>
-					// 	<option value="1h">1 Hour</option>
-					// 	<option value="1d">1 Day</option>
-					// 	<option value="5d">5 Days</option>
-					// 	<option value="1wk">1 Week</option>
-					// 	<option value="1mo">1 Month</option>
-					// 	<option value="3mo">3 Months</option>
-
 	// Create Date Picker with start // no longer need enddate '<input type="date" id="endDate" name="trip-start"value="2022-01-05">'
 	AddDataHTML('<input type="date" id="startDate" name="trip-start"value="2022-01-04">');
 
 	// Create Date Picker with start and end dates
 	//AddDataHTML('<h5>Select Dates and Update Data</h5>');
 	//AddDataHTML('<div class="input-group input-daterange"><input type="text" id="startDate" class="form-control m-1" value="2022-01-04"><div class="input-group-addon">to</div><input type="text" id="endDate" class="form-control m-1" value="2022-01-05"></div>');
-
 
 	// Load Submit Button
 	AddDataHTML("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");

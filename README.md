@@ -24,8 +24,9 @@ complete restructure. Need to have each task planned and list what I've done.
 4-Improvement-timeliness
 Changed system so that you now only seek 1m data. This data can then be used to fill 3 min, 1 hour, 1 day etc... data
 
-Commit 1 - Update updateDataYahoo to cache held data
-Commit 2 - Update updateDataYahoo to display cached data in calendar
+Commit message - 
+Commit 2 - Update updateDataYahoo to display cached data in calendar. 
+Is it worth having the data stored as dates instead inside cache?
 Commit 3 - Update so that yahoo data will appear in show data table. Need to be able to select time period.
 Commit 4 - Update updateDataPython to cache held data
 Commit 5 - Update updateDataPython to display cached data in calendar

@@ -30,8 +30,26 @@ async function YahooUpdatePage() {
 		// Sumbit Button Event Listener
 		$("#btnUpdateStockSubmit").click(YahooUpdateAfterSelectedPage);
 
+		// Load redo Cache button
+		AddDataHTML("<button id='btnReloadCacheSubmit' class='btn btn-primary mt-2 '>Reload Cache</button>");
+
+		// Reload Cache Button Event Listener
+		$("#btnReloadCacheSubmit").click(ReloadCacheButton);
+
 	})
 	
+}
+
+async function ReloadCacheButton(){
+
+	let symbol = document.getElementById("stockSelector").value;
+
+	await ReCache(symbol).then(function(){
+		AddDataHTML(`Cache for ${symbol} updated`);
+	}); 
+
+
+
 }
 
 // Get Stocks from JSON file
@@ -64,14 +82,16 @@ function YahooUpdateAfterSelectedPage()
 		let symbol = document.getElementById("stockSelector").value;
 		RefreshIndexData();
 
+		// Make space at top otherwise the calendar dropbox open upwards
+
 		// Set calendar with highlighted dates for which daily data is held
-		AddDataHTML(`<h5>View held data and update or add daily data from Yahoo Finance</h5>`);
+		AddDataHTML(`<h5 >View held data and update or add daily data from Yahoo Finance</h5>`);
 		AddDataHTML(`<h5 id="security">${symbol}</h5>`);
 
 		// Show held data
 		AddDataHTML(`<h5>Calendar</h5>`);
 		AddDataHTML(`Held Data is Highlighted`);
-		AddDataHTML('<input id="date" data-provide="datepicker" name="date_from" >');
+		AddDataHTML('<div id="calendar" > </div> ');
 		ShowHeldData(symbol); 
 
 		// Spaces
@@ -79,7 +99,7 @@ function YahooUpdateAfterSelectedPage()
 		AddDataHTML('<h5></h5>');
 
 		// Load box to input key to use for ajax yahoo finance Request
-		AddDataHTML("<input id='yahooKey' class = 'm-1' type='text' placeholder='Enter Yahoo Finance Key' >");
+		AddDataHTML("<input id='yahooKey' type='text' placeholder='Enter Yahoo Finance Key' >");
 
 		// Load Region Box
 		AddDataHTML("<select id='securityRegion'><option value='GB'>GB</option> <option value='US'>US</option></select>"); 
@@ -104,39 +124,37 @@ function YahooUpdateAfterSelectedPage()
 
 async function ShowHeldData(symbol)
 {
+	// Get cache dates held for the security submitted
+	await GetCachedData(symbol).then(function(cachedData){
 
-	// Need to get cache dates held for the security submitted
+		let datesHeld = [];
 
-
-	// Need to get cached dates that are excluded
-
-
-	let datesForDisable = ["2022-01-01", "2022-01-02"]; 
-	let dataForHighlight = ["2022-01-04"];
-
-	$('#date').datepicker({ 
-	//startDate: date,
-	multidate: true,
-	format: 'yyyy-mm-dd',
-	todayHighlight: true,
-	datesDisabled: datesForDisable,
-	multidateSeparator: ',  ',
-	daysOfWeekDisabled: "0,6",
-	beforeShowDay: function(date) {
-		for(let i of dataForHighlight){
-			let thisDate = new Date(date).toISOString().split('T')[0]; 
-			 
-			if(i == thisDate){
-				return {classes: 'highlighted', tooltip: 'Data for this date is held'};
-			}
-		}
+		// Convert each entry to date time
+		for(let i of cachedData){
+			let date = new Date(i*1000);
+			let dateToAdd = `${("0" + (date.getMonth() + 1)).slice(-2)}/${("0" + date.getDate()).slice(-2)}/${date.getFullYear()}`
+			datesHeld[ new Date( dateToAdd )] = new Date( dateToAdd).toString();
+		} 
 		
-	 },
-	templates : {
-	}
-	});
+		// Datepicker
 
-	$(`highlighted`).css('background-color: blue;')
+		let datesForDisable = ["2022-01-01", "2022-01-02"]; 
+
+		jQuery('#calendar').datepicker({
+			dateFormat: 'yyyy-mm-dd',
+			todayHighlight: true,
+			datesDisabled: datesForDisable,
+			daysOfWeekDisabled: "0,6",
+			beforeShowDay: function( date ) {
+				var highlight = datesHeld[date];
+				if( highlight ) {
+					return [true, "event", "Data for this date is held"]; 
+				} else {
+					return [true, '', ''];
+				}
+			}
+		});
+	})
 
 }
 
@@ -402,7 +420,7 @@ async function GetCachedData(symbol)
 }
 
 // After the new data has been entered into the database, the cache files are recached
-function ReCache(symbol)
+async function ReCache(symbol)
 {
 	// Need to first make the caches then make showdata highlight the stored dates on the calendar
 
@@ -462,3 +480,4 @@ function ReCache(symbol)
 	})
 
 } 
+
