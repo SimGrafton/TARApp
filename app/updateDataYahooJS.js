@@ -48,8 +48,6 @@ async function ReloadCacheButton(){
 		AddDataHTML(`Cache for ${symbol} updated`);
 	}); 
 
-
-
 }
 
 // Get Stocks from JSON file
