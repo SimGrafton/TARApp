@@ -6,11 +6,11 @@ async function YahooUpdatePage() {
 
 	RefreshIndexData();
 
-	// Read Json file and get the existing stocks held
-	await GetSecuritiesFromYahooDir().then(function(response) {
+	// Read Yahoo directory and get the existing stocks held (shared function)
+	await GetSecuritiesFromDataDir('data/yahooData').then(function(response) {
 
 		// Set update or add data boxes
-		// Load select box with securites found within json file for user to to select security symbol
+		// Load select box with securites found within data directory for user to to select security symbol
 
 		AddDataHTML("<h5>Select Security to update or enter new security</h5>");
 
@@ -44,36 +44,11 @@ async function ReloadCacheButton(){
 
 	let symbol = document.getElementById("stockSelector").value;
 
-	await ReCache(symbol).then(function(){
+	await ReCache(symbol, "1d").then(function(){
 		AddDataHTML(`Cache for ${symbol} updated`);
 	}); 
 
 }
-
-// Get Stocks from JSON file
-async function GetSecuritiesFromYahooDir()
-{
-	return new Promise(resolve => {
-
-		let stocks = []; 
-
-		fs.readdir('data/yahooData', 'utf8', function (err, files) {
-			if (err) {
-				console.log("An error has occurred opening json storage file: " + err);
-			}
-			else {
-				// Iterate through file names, remove .json and store in object
-				for(let k in files)
-				{
-					let stock = files[k].substr(0, files[k].indexOf('.json'));
-					stocks.push(stock);
-				}
-
-				resolve (stocks); 
-			} 
-		})
-	})
-};
 
 function YahooUpdateAfterSelectedPage()
 {
@@ -90,7 +65,7 @@ function YahooUpdateAfterSelectedPage()
 		AddDataHTML(`<h5>Calendar</h5>`);
 		AddDataHTML(`Held Data is Highlighted`);
 		AddDataHTML('<div id="calendar" > </div> ');
-		ShowHeldData(symbol); 
+		ShowHeldData(symbol, "1d"); 
 
 		// Spaces
 		AddDataHTML('<h5></h5>');
@@ -119,43 +94,6 @@ function YahooUpdateAfterSelectedPage()
 		// Back Button Event Listener
 		$("#btnBackYahooUpdatePage").click(YahooUpdatePage);
 }
-
-async function ShowHeldData(symbol)
-{
-	// Get cache dates held for the security submitted
-	await GetCachedData(symbol).then(function(cachedData){
-
-		let datesHeld = [];
-
-		// Convert each entry to date time
-		for(let i of cachedData){
-			let date = new Date(i*1000);
-			let dateToAdd = `${("0" + (date.getMonth() + 1)).slice(-2)}/${("0" + date.getDate()).slice(-2)}/${date.getFullYear()}`
-			datesHeld[ new Date( dateToAdd )] = new Date( dateToAdd).toString();
-		} 
-		
-		// Datepicker
-
-		let datesForDisable = ["2022-01-01", "2022-01-02"]; 
-
-		jQuery('#calendar').datepicker({
-			dateFormat: 'yyyy-mm-dd',
-			todayHighlight: true,
-			datesDisabled: datesForDisable,
-			daysOfWeekDisabled: "0,6",
-			beforeShowDay: function( date ) {
-				var highlight = datesHeld[date];
-				if( highlight ) {
-					return [true, "event", "Data for this date is held"]; 
-				} else {
-					return [true, '', ''];
-				}
-			}
-		});
-	})
-
-}
-
 
 // Gets the Selected Stock and Inputted Yahoo Finance Key and then calls YahooFinanceRequest() with settings set from SetYahooFinanceAPIRequestSettings()
 async function SendAPIHttpRequest(){
@@ -330,7 +268,7 @@ async function OpenYahooFileAndWrite(data, symbol) {
 						}
 						else{ 
 							console.log('Yahoo Process - New file created and data added'); 
-							ReCache(symbol); 
+							ReCache(symbol, "1d"); 
 							return; 
 						}
 					})
@@ -360,7 +298,7 @@ async function OpenYahooFileAndWrite(data, symbol) {
 				{
 					// For each new entry, check if in array of cache, if not then add it, if so then put in an array and output not added data
 					// if q in response then do not add 
-					if (response.includes(q[`date`]))
+					if (response["1d"].includes(q[`date`]))
 					{
 						datesNotAdded.push(q[`date`]); 
 					}
@@ -387,7 +325,7 @@ async function OpenYahooFileAndWrite(data, symbol) {
 					}
 					else{
 						console.log( `Yahoo Process - Data updated`);
-						ReCache(symbol); 
+						ReCache(symbol, "1d"); 
 					}
 				})
 			}
@@ -395,87 +333,3 @@ async function OpenYahooFileAndWrite(data, symbol) {
 	)
 	}); 
 };
-
-async function GetCachedData(symbol)
-{
-	return new Promise(resolve => {
-
-		// Open cache
-		fs.readFile(`data/cache.json`, 'utf8', function (error, cachedData) {
-			if (error) { 
-				
-				console.log(`Error Opening file:  ${error}`);
-				
-			}
-			else {
-				// Parse data
-				let parsedCache = JSON.parse(cachedData); 
-				resolve(parsedCache[symbol]); 
-			}
-		})
-	})
-	
-}
-
-// After the new data has been entered into the database, the cache files are recached
-async function ReCache(symbol)
-{
-	// Need to first make the caches then make showdata highlight the stored dates on the calendar
-
-	// Run through the JSON file and get the days held under the symbol and put into a long json string under each year
-	console.log(`Yahoo Process - Opening JSON data file for ${symbol} to prepare cache`); 
-
-	// Open file
-	fs.readFile(`data/yahooData/${symbol}.json`, 'utf8', function (error, mainJsonFile) {
-		if (error) { 
-			
-			console.log(`Error Opening file:  ${error}`);
-			
-		}
-		else {
-
-			// Parse the json returned
-			let parsedMainJsonFile = JSON.parse(mainJsonFile); 
-
-			let datesHeld = []; 
-
-			for(let i of parsedMainJsonFile[symbol]['prices'])
-			{
-				datesHeld.push(i.date); 
-			}
-
-			// Open cache, find the array for the symbol and store
-			fs.readFile(`data/cache.json`, 'utf8', function (error2, cache) {
-				if (error) { 
-					console.log(`Error Opening Cache:  ${error2}`);			
-				}
-				else{
-
-					// Parse the json returned
-					let parsedCache = JSON.parse(cache);
-					parsedCache[symbol] = datesHeld; 
-
-					// Save to file
-					fs.writeFile(`data/cache.json`, JSON.stringify(parsedCache), function writeJSON(err) {
-						if (err) 
-						{
-							console.log( `Error updating Cache: ${err}`);
-							return ; 
-						}
-						else{
-							console.log("Yahoo Process - Cache updated")
-						}
-					})
-
-				}
-
-			}
-
-			)
-
-
-		}
-	})
-
-} 
-

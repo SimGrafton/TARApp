@@ -6,6 +6,10 @@ Restart
 "npm install" from within main folder
 run app with "npm start" from within main folder
 
+For the yfinance calls for 1m data
+Install python
+install yfiannce - "pip install yfinance"
+
 -- End of full set up --
 
 
@@ -25,8 +29,10 @@ complete restructure. Need to have each task planned and list what I've done.
 Changed system so that you now only seek 1m data. This data can then be used to fill 3 min, 1 hour, 1 day etc... data
 
 Commit message - 
-Commit 3 - Updated so that yahoo data will appear in show data table. Need to be able to select time period. Working on DisplayData function within displayTableJS
 Commit 4 - Update updateDataPython to cache held data
+Need to change the way the cached data is stored, updated redo GetCache
+Change in Redo Cache
+Needs to be 1m and 1d data then have the data
 Commit 5 - Update updateDataPython to display cached data in calendar
 Commit 6 - Update so that python minute data will appear in show data. Need to able to select a day to show that data
 Commit 7 - Cache all dates that are not trading days, have a way to input non trading days
@@ -50,5 +56,9 @@ Future thoughts:
 1. Yahoo finance historical daily data gets the last 254 days ish. So will only need to run the script once
 every 250 days for each stock to have updated data. Could create a button to update all stocks.
 
+2. After speaking to Duncan, it may make more sense in the future to have the data stored and accessed from a database.
+Otherwise I will need to parse and iterate through an enourmous JSON file, or segregate the data. For the database, 
+I could use something along the lines of SQLite, to run a database locally. Otherwise, I could use Docker to host a 
+MongoDB database.
 -- End of To do --
 

@@ -6,38 +6,79 @@ const { Console } = require('console');
 
 // Update Button EventListener
 // Load Index html for updating stock data
-function PythonUpdatePage() {
+async function PythonUpdatePage() {
 
 	RefreshIndexData();
 
-	// Load Title
-	AddDataHTML('<div class="p-1 text-center"><h5 class="mb-1">Add Security Data</h5></div>'); 
+	// Read Yahoo directory and get the existing stocks held (shared function)
+	await GetSecuritiesFromDataDir('data/yfinanceData').then(function(response) {
 
-	// Load Security Search Box
-	AddDataHTML('<input id="stockSelector" type="text" placeholder="Enter Security Identifier.." default="RR.L"></input>'); 
+		// Set update or add data boxes
+		// Load select box with securites found within data directory for user to to select security symbol
 
-	// Load Region box (no longer requred) 
-	AddDataHTML('<input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>'); 
-	
-	// Load Timeliness Selection box with options
-	AddDataHTML(`<select name="timelinessSelect" id="intervalSelector" ><option value="" disabled selected>Select Timeliness</option>
+		AddDataHTML("<h5>Select Security to update or enter new security</h5>");
+
+		// Load Security Search Box with file names returned from dir
+		let text = '<input type="text" name="stockSymbolSelect" id="stockSelector" list="options" placeholder="Select or type new"><datalist id="options">'; 
+
+		for (let i in response)
+		{
+			text +='<option value="' + response[i] + '">' + response[i] + '</option>'; 
+		}
+
+		text += '</datalist>';
+		AddDataHTML(text);
+
+		// Load Region box (may or may not be required, unsure )
+		//AddDataHTML('<input id="securityRegion" type="text" placeholder="Enter Security Region.."></input>'); 
+
+		// Load Timeliness Selection box with options (not really needed as will always be 1m data)
+		AddDataHTML(`<select name="timelinessSelect" id="intervalSelector" ><option value="" disabled selected>Select Timeliness</option>
 						<option value="1m" selected="selected">1 Minute</option>
 					</select>`);
 
-	// Create Date Picker with start // no longer need enddate '<input type="date" id="endDate" name="trip-start"value="2022-01-05">'
-	AddDataHTML('<input type="date" id="startDate" name="trip-start"value="2022-01-04">');
+		// Show Calendar with held dates on
+		AddDataHTML(`<h5>Calendar</h5>`);
+		AddDataHTML(`Held Data is Highlighted`);
+		AddDataHTML('<div id="calendar" > </div> ');
+		
 
-	// Create Date Picker with start and end dates
-	//AddDataHTML('<h5>Select Dates and Update Data</h5>');
-	//AddDataHTML('<div class="input-group input-daterange"><input type="text" id="startDate" class="form-control m-1" value="2022-01-04"><div class="input-group-addon">to</div><input type="text" id="endDate" class="form-control m-1" value="2022-01-05"></div>');
+		// Create Date Picker with start // no longer need enddate '<input type="date" id="endDate" name="trip-start"value="2022-01-05">'
+		AddDataHTML('<input type="date" id="startDate" name="trip-start"value="2022-01-04">');
 
-	// Load Submit Button
-	AddDataHTML("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
+		// Load Submit Button
+		AddDataHTML("<button id='btnAddStockSubmit' class='btn btn-primary mt-2 '>Add</button>");
 
-	// Submit button event listener
-	$("#btnAddStockSubmit").click(AddDataProcess);
-	
+		// Submit button event listener
+		$("#btnAddStockSubmit").click(AddDataProcess);
+
+		// Stock Selection Event Listener
+		$("#stockSelector").change(ChangeHeldData);
+
+		// Load redo Cache button
+		AddDataHTML("<button id='btnReloadCacheSubmit' class='btn btn-primary mt-2 '>Reload Cache</button>");
+
+		// Reload Cache Button Event Listener
+		$("#btnReloadCacheSubmit").click(ReloadCacheButton);
+
+	}); 
 }; 
+
+function ChangeHeldData(){
+
+	let securitySelected = document.getElementById("stockSelector").value.toUpperCase();
+	ShowHeldData(securitySelected, '1m'); 
+}
+
+async function ReloadCacheButton(){
+
+	let symbol = document.getElementById("stockSelector").value;
+
+	await ReCache(symbol, "1m").then(function(){
+		AddDataHTML(`Cache for ${symbol} updated`);
+	}); 
+
+}
 
 function AddDataProcess()
 {
@@ -111,7 +152,7 @@ async function RunYfinanceScript(securitySelected, interval, startDate)
 	// if unsuccessful
 	dir.stderr.on( 'data', function(data){
 		console.log( `stderr: ${ data }` );
-		console.log("Error in YFinance Call"); 
+		return console.log("Error in YFinance Call"); 
 	}); 
 
 	// On close of child process
@@ -157,7 +198,7 @@ async function CleanseReturnedData(securitySelected, interval, startDate, endDat
 			}
 
 			// Add data to file
-			OpenFileAndWrite(jsonNewData, securitySelected, interval, originalDate);
+			OpenPythonFileAndWrite(jsonNewData, securitySelected, interval, originalDate);
 
 			setTimeout(function(){
 				// Load Submit Button
@@ -190,13 +231,13 @@ async function GetNewJSONData(securitySelected)
 };
 
 // Opens file, gets stats of file and check file has size, if so, if file has the stock, updates the values, otherwise it appends.
-async function OpenFileAndWrite(data, symbol, interval, date) {
+async function OpenPythonFileAndWrite(data, symbol, interval, date) {
 
 	fs.readFile(`data/${symbol}.json`, 'utf8', function (error, mainJsonFile) {
 		if (error) { 
 			if(error = `Error:  ENOENT: no such file or directory, open 'D:\\projects\\TARWeb\\data\\${symbol}.json'`)
 			{
-				AddDataHTML('<div class="p-1 text-center"><h5 class="mb-1">Existing File not found. Creating new file...</h5></div>' );  
+				console.log('Existing File not found. Creating new file...' );  
 
 				// Set new object and write
 				let jsonToAdd = {[`${symbol}`]: {}}; 
@@ -208,7 +249,8 @@ async function OpenFileAndWrite(data, symbol, interval, date) {
 						return console.log(err);
 					}
 					else{
-						AddDataHTML('<div class="p-1 text-center"><h5 class="mb-1">New file created and data added</h5></div>' );
+						console.log('New file created and data added' );
+						ReCache(symbol, "1m"); 
 					}
 				})
 
@@ -254,6 +296,7 @@ async function OpenFileAndWrite(data, symbol, interval, date) {
 					}
 					else{
 						AddDataHTML('<div class="p-1 text-center"><h5 class="mb-1">Data updated</h5></div>' );
+						ReCache(symbol, "1m"); 
 					}
 				})
 			}
